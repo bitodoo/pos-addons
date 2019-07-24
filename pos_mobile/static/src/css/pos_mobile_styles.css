@@ -1011,9 +1011,23 @@
     margin-right:30px;
     margin-left: 30px;
 }
-.pos.mobile .summary .total {
+/*.pos.mobile .summary .total {
     text-align: center;
+}*/
+
+/* ADD */
+.pos.mobile .summary .value:nth-child(2){
+    float: right;
 }
+.pos.mobile .summary .value:nth-child(2):before{
+    content: "Total: "
+}
+.pos.mobile .summary .label{
+    float: right;
+    display: none;
+}
+/* END ADD */
+
 .pos.mobile .summary .line .subentry{
     display: inline-block;
 }
