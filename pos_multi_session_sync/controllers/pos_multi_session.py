@@ -1,5 +1,8 @@
-# -*- coding: utf-8 -*-
+# Copyright 2017 Ivan Yelizariev <https://it-projects.info/team/yelizariev>
+# Copyright 2017, 2019 Kolushov Alexandr <https://it-projects.info/team/KolushovAlexandr>
+# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html).
 
+import copy
 import datetime
 import logging
 import json
@@ -20,10 +23,12 @@ class Controller(BusController):
 
     @odoo.http.route('/pos_multi_session_sync/update', type="json", auth="public")
     def multi_session_update(self, multi_session_id, message, dbname, user_ID):
-
+        # Don't change original dict, because in case of SERIALIZATION_FAILURE
+        # the method will be called with the same dictionary
+        message = copy.deepcopy(message)
         phantomtest = request.httprequest.headers.get('phantomtest')
         ms_model = request.env["pos_multi_session_sync.multi_session"]
-        allow_public = request.env['ir.config_parameter'].get_param('pos_longpolling.allow_public')
+        allow_public = request.env['ir.config_parameter'].sudo().get_param('pos_longpolling.allow_public')
         if allow_public:
             ms_model = ms_model.sudo()
         ms = ms_model.search([('multi_session_ID', '=', int(multi_session_id)),
@@ -31,12 +36,14 @@ class Controller(BusController):
         if not ms:
             ms = ms_model.create({'multi_session_ID': int(multi_session_id), 'dbname': dbname})
         ms = ms.with_context(user_ID=user_ID, phantomtest=phantomtest)
+        _logger.debug('On update message by user %s (dbname=%s, multi_session_id=%s): %s', user_ID, dbname, multi_session_id, message)
         res = ms.on_update_message(message)
+        _logger.debug('Return result after update by user %s: %s', user_ID, res)
         return res
 
     @odoo.http.route('/pos_multi_session/test/gc', type="http", auth="user")
     def pos_multi_session_test_gc(self):
-        allow_external_tests = request.env['ir.config_parameter'].get_param('pos_multi_session.allow_external_tests')
+        allow_external_tests = request.env['ir.config_parameter'].sudo().get_param('pos_multi_session.allow_external_tests')
         if not allow_external_tests:
             _logger.warning('Create System Parameter "pos_multi_session.allow_external_tests" to use test GC')
             return 'Create System Parameter "pos_multi_session.allow_external_tests" to use test GC'

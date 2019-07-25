@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
 {
     "name": """POS restaurant base""",
     "summary": """Technical module in POS""",
     "category": "Point of Sale",
     # "live_test_URL": "",
     "images": [],
-    "version": "1.0.0",
+    "version": "11.0.2.0.4",
     "application": False,
 
     "author": "IT-Projects LLC, Dinar Gabbasov",
-    "support": "apps@it-projects.info",
+    "support": "pos@it-projects.info",
     "website": "https://twitter.com/gabbasov_dinar",
     "license": "LGPL-3",
     "price": 35.00,

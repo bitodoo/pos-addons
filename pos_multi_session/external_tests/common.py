@@ -1,4 +1,8 @@
-# -*- coding: utf-8 -*-
+# Copyright 2016-2017 Ivan Yelizariev <https://it-projects.info/team/yelizariev>
+# Copyright 2016 Dinar Gabbasov <https://it-projects.info/team/GabbasovDinar>
+# Copyright 2017 Kolushov Alexandr <https://it-projects.info/team/KolushovAlexandr>
+# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html).
+
 from datetime import datetime, timedelta
 import errno
 import glob
@@ -70,12 +74,12 @@ class ExternalTestCase(unittest2.TestCase):
 
         return res
 
-    def exec_workflow(self, model, signal, id, uid=None, password=None):
+    def exec_workflow(self, model, signal, rid, uid=None, password=None):
         uid = uid or self.admin_uid
         password = password or ADMIN_PASSWORD
         return self.xmlrpc_models.exec_workflow(
             DATABASE, uid, password,
-            model, signal, id)
+            model, signal, rid)
 
     def xmlid_to_id(self, xmlid, uid=None, password=None):
         res_id = self.execute_kw('ir.model.data', 'xmlid_to_res_id', [xmlid], uid=uid, password=password)
@@ -154,14 +158,15 @@ class ExternalTestCase(unittest2.TestCase):
         t0 = datetime.now()
         td = timedelta(seconds=timeout)
         buf = bytearray()
+        pid = phantom.stdout.fileno()
         while True:
             # timeout
             self.assertLess(datetime.now() - t0, td, "PhantomJS tests should take less than %s seconds" % timeout)
 
             # read a byte
             try:
-                ready, _, _ = select.select([phantom.stdout], [], [], 0.5)
-            except select.error, e:
+                ready, _, _ = select.select([pid], [], [], 0.5)
+            except select.error as e:
                 # In Python 2, select.error has no relation to IOError or
                 # OSError, and no errno/strerror/filename, only a pair of
                 # unnamed arguments (matching errno and strerror)

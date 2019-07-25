@@ -2,7 +2,7 @@ odoo.define('pos_product_category_discount.models', function (require) {
     "use strict";
 
     var models = require('point_of_sale.models');
-    var Model = require('web.Model');
+    var rpc = require('web.rpc');
 
     models.load_models({
         model: 'pos.discount_program',
@@ -19,6 +19,7 @@ odoo.define('pos_product_category_discount.models', function (require) {
             }
         },
     });
+
     models.load_models({
         model: 'pos.category_discount',
         fields: [],
@@ -28,19 +29,41 @@ odoo.define('pos_product_category_discount.models', function (require) {
             }
         },
     });
+
+    models.load_fields('product.product',['discount_allowed']);
+    models.load_fields('res.partner',['discount_program_id']);
+
     var PosModelSuper = models.PosModel;
     models.PosModel = models.PosModel.extend({
-        load_server_data: function() {
-            var partner_model = _.find(this.models, function(model){
-                return model.model === 'res.partner';
-            });
-            partner_model.fields.push('discount_program_id');
-
+        initialize: function (session, attributes) {
+            // <new-code>
+            var self = this;
             var product_model = _.find(this.models, function(model){
                 return model.model === 'product.product';
             });
-            product_model.fields.push('discount_allowed');
-            return PosModelSuper.prototype.load_server_data.apply(this, arguments);
+            var loaded_super = product_model.loaded;
+            product_model.loaded = function(that, products) {
+                loaded_super(that, products);
+                if (self.config.module_pos_discount) {
+                    self.load_discount_product(product_model.fields, loaded_super);
+                }
+            };
+            // </new-code>
+            return PosModelSuper.prototype.initialize.call(this, session, attributes);
+        },
+        load_discount_product: function(fields, loaded_super) {
+            var self = this;
+            var discount_product_id = this.config.discount_product_id[0];
+            var product = this.db.get_product_by_id(discount_product_id);
+            if (!product) {
+                rpc.query({
+                    model: 'product.product',
+                    method: 'read',
+                    args: [[discount_product_id], fields],
+                }).then(function(p){
+                    loaded_super(self, p);
+                });
+            }
         },
         get_discount_categories: function(id) {
             return _.filter(this.discount_categories, function(item){
@@ -48,7 +71,7 @@ odoo.define('pos_product_category_discount.models', function (require) {
             });
         },
         set_discount_categories_by_program_id: function(id) {
-            if (this.config.iface_discount) {
+            if (this.config.module_pos_discount && this.config.discount_product_id) {
                 var self = this;
                 var discount_categories = this.get_discount_categories(id);
                 var order = this.get_order();
@@ -74,16 +97,19 @@ odoo.define('pos_product_category_discount.models', function (require) {
                 line.set_discount(discount.category_discount_pc);
             });
             order.discount_program_id = discount.discount_program_id[0];
+            order.discount_program_name = discount.discount_program_id[1];
         },
     });
 
     var OrderSuper = models.Order;
     models.Order = models.Order.extend({
         remove_all_discounts: function() {
-            if (this.pos.config.iface_discount) {
+            if (this.pos.config.module_pos_discount && this.pos.config.discount_product_id) {
                 this.discount_program_id = false;
                 this.get_orderlines().forEach(function(line){
-                    line.set_discount(false);
+                    if (line.discount_program_name) {
+                        line.set_discount(false);
+                    }
                 });
             }
         },
@@ -91,12 +117,16 @@ odoo.define('pos_product_category_discount.models', function (require) {
             var json = OrderSuper.prototype.export_as_JSON.call(this);
             json.product_discount = this.product_discount || false;
             json.discount_program_id = this.discount_program_id;
+            json.discount_program_name = this.discount_program_name;
+            json.discount_percent = this.discount_percent;
             return json;
         },
         init_from_JSON: function(json) {
             OrderSuper.prototype.init_from_JSON.apply(this,arguments);
             this.product_discount = json.product_discount || false;
             this.discount_program_id = json.discount_program_id;
+            this.discount_program_name = json.discount_program_name;
+            this.discount_percent = json.discount_percent;
         },
     });
 

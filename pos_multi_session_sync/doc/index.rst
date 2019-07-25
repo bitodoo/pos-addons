@@ -7,6 +7,23 @@ Installation
 
 * `Install <https://odoo-development.readthedocs.io/en/latest/odoo/usage/install-module.html>`__ this module in a usual way
 
+Number of workers
+-----------------
+
+``Separate Sync Server`` is recommended to launch with ``--workers=1`` to deactivate multiprocessing leading to concurrency updates in DB, otherwise the synchronization conflicts may appear.
+
+You can make it in 2 ways:
+
+* set workers parameter in odoo configuration file::
+
+   workers=1
+
+OR
+
+* via terminal directly, e.g.::
+
+   ./odoo-bin --config=path/to/odoo-server.conf --workers=1
+
 Separate Sync Server
 --------------------
 
@@ -98,7 +115,8 @@ Configuration
 
 Separate Sync Server
 --------------------
-In order to configure access to the sync server do the following on a server:
+
+In order to configure access to the ``Sync server`` do the following on a server:
 
 * `Activate Developer Mode <https://odoo-development.readthedocs.io/en/latest/odoo/usage/debug-mode.html>`__
 * Open menu ``[[ Settings ]] >> Parameters >> System Parameters``
@@ -113,10 +131,10 @@ In order to configure access to the sync server do the following on a server:
 Main server
 -----------
 
-Configure sync server in the main server :
+Configure the sync server in the main server:
 
 * Open ``[[ Point of Sale ]] >> Configuration >> Point of sale``
 * Click on a POS belonging to Multi-session required for syncing
 * Click ``[Edit]``
-* Specify an external server url in the field **Sync Server**. Example of a filled-in field ``//localhost:8080``
+* Specify an external server url in the field **Sync Server**. Example of a filled-in field ``//localhost:8079`` or ``//127.0.0.1:8079``
 * Click ``[Save]``

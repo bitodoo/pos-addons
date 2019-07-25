@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
 {
     "name": """POS discount base""",
     "summary": """Technical module in POS""",
     "category": "Point of Sale",
     # "live_test_URL": "",
     "images": [],
-    "version": "1.0.0",
+    "version": "11.0.1.0.0",
     "application": False,
 
     "author": "IT-Projects LLC, Dinar Gabbasov",
-    "support": "apps@it-projects.info",
+    "support": "pos@it-projects.info",
     "website": "https://twitter.com/gabbasov_dinar",
     "license": "LGPL-3",
     "price": 0.00,
@@ -32,5 +31,5 @@
     "post_init_hook": None,
 
     "auto_install": False,
-    "installable": False,
+    "installable": True,
 }

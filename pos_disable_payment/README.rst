@@ -18,8 +18,9 @@ Credits
 
 Contributors
 ------------
-* Ivan Yelizariev <yelizariev@it-projects.info>
-* Ilmir Karamov <karamov@it-projects.info>
+* `Ivan Yelizariev <https://it-projects.info/team/yelizariev>`__
+* `Ilmir Karamov <https://it-projects.info/team/ilmir-k>`__
+* `Dinar Gabbasov <https://it-projects.info/team/GabbasovDinar>`__
 
 Sponsors
 --------
@@ -34,6 +35,8 @@ Maintainers
       Thank you for understanding!
 
       `IT-Projects Team <https://www.it-projects.info/team>`__
+
+* The module is not maintained since Odoo 12.0. All changes of the module have been migrated to  `Point of Sale - Extra Access Right <https://github.com/OCA/pos/tree/12.0/pos_access_right/>`__ module. Read more `here. <https://github.com/OCA/pos/issues/232>`__
   
 Further information
 ===================

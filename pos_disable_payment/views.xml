@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp><data>
+<openerp>
 
 <template id="assets_backend" name="pos_disable_payment assets" inherit_id="point_of_sale.assets">
     <xpath expr="." position="inside">
+        <link rel="stylesheet" href="/pos_disable_payment/static/src/css/pos.css"/>
         <script type="text/javascript" src="/pos_disable_payment/static/src/js/pos_disable_payment.js"></script>
     </xpath>
 </template>
@@ -23,9 +24,10 @@
                         <field name="allow_decrease_amount" attrs="{'invisible':[('allow_create_order_line','=',False)]}"/>
                         <field name="allow_delete_order_line" attrs="{'invisible':['|',('allow_decrease_amount','=',False),('allow_create_order_line','=',False)]}"/>
                         <field name="allow_refund" attrs="{'invisible':[('allow_create_order_line','=',False)]}"/>
+                        <field name="allow_manual_customer_selecting"/>
                     </group>
             </xpath>
         </field>
     </record>
 
-</data></openerp>
+</openerp>

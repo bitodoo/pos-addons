@@ -8,6 +8,7 @@ odoo.define('pos_print_method.tour', function(require) {
 
     tour.register('pos_print_method_tour', {
         url: "/web",
+        test: true,
     }, [{
         trigger: '.o_app[data-menu-xmlid="point_of_sale.menu_point_root"], .oe_menu_toggler[data-menu-xmlid="point_of_sale.menu_point_root"]',
         content: _t("Ready to launch your <b>point of sale</b>? <i>Click here</i>."),
@@ -19,7 +20,8 @@ odoo.define('pos_print_method.tour', function(require) {
     }, {
         trigger: ".tables .table",
         content: _t("<p>Click <b>table</b></p>"),
-        position: "bottom"
+        position: "bottom",
+        timeout: 20000,
     }, {
         trigger: "span[data-category-id='1']",
         content: _t("<p>Click <b>Fruits and Vegetables</b> category.</p>"),

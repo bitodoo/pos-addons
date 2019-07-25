@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
 {
     "name": """Print certain products on Order Printers""",
     "summary": """Specify certain products to be allowed to print on order printers""",
     "category": "Point of Sale",
     # "live_test_URL": "",
     "images": ['images/pos_order_printer_product_main.png'],
-    "version": "1.0.0",
+    "version": "11.0.1.0.1",
     "application": False,
 
     "author": "IT-Projects LLC, Dinar Gabbasov",
-    "support": "apps@it-projects.info",
+    "support": "pos@it-projects.info",
     "website": "https://twitter.com/gabbasov_dinar",
     "license": "LGPL-3",
     "price": 49.00,
