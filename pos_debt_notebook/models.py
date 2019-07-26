@@ -1,4 +1,4 @@
-# Copyright 2014-2019 Ivan Yelizariev <https://it-projects.info/team/yelizariev>
+# Copyright 2014-2018 Ivan Yelizariev <https://it-projects.info/team/yelizariev>
 # Copyright 2015 Alexis de Lattre <https://github.com/alexis-via>
 # Copyright 2016-2017 Stanislav Krotov <https://it-projects.info/team/ufaks>
 # Copyright 2016 Florent Thomas <https://it-projects.info/team/flotho>
@@ -7,7 +7,6 @@
 # Copyright 2018 Kolushov Alexandr <https://it-projects.info/team/KolushovAlexandr>
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html).
 
-import copy
 from odoo import models, fields, api
 from datetime import datetime
 from pytz import timezone
@@ -32,6 +31,7 @@ class ResPartner(models.Model):
             domain,
             fields,
             'partner_id')
+
         res_index = dict((id, {'balance': 0}) for id in self.ids)
         for data in res:
             res_index[data['partner_id'][0]] = data
@@ -54,10 +54,10 @@ class ResPartner(models.Model):
 
         res_index = dict((id, 0) for id in partners.ids)
         for data in res:
-            pid = data['partner_id'][0]
+            id = data['partner_id'][0]
             balance = data['balance']
             for r in partners:
-                if pid == r.id or pid in r.child_ids.ids:
+                if id == r.id or id in r.child_ids.ids:
                     res_index[r.id] += balance
 
         for r in partners:
@@ -180,22 +180,6 @@ class ResPartner(models.Model):
         if partner.get('debt_limit') is False:
             del partner['debt_limit']
         return super(ResPartner, self).create_from_ui(partner)
-
-    @api.multi
-    def _compute_partner_journal_debt(self, journal_id):
-        domain = [('partner_id', 'in', self.ids),
-                  ('journal_id', '=', journal_id)]
-        fields = ['partner_id', 'balance', 'journal_id']
-        res = self.env['report.pos.debt'].read_group(
-            domain,
-            fields,
-            'partner_id')
-
-        res_index = dict((id, {'balance': 0}) for id in self.ids)
-
-        for data in res:
-            res_index[data['partner_id'][0]] = data
-        return res_index
 
 
 class ResConfigSettings(models.TransientModel):
@@ -492,9 +476,6 @@ class PosOrder(models.Model):
 
     @api.model
     def _process_order(self, pos_order):
-        # Don't change original dict, because in case of SERIALIZATION_FAILURE
-        # the method will be called again
-        pos_order = copy.deepcopy(pos_order)
         credit_updates = []
         amount_via_discount = 0
         for payment in pos_order['statement_ids']:
@@ -625,13 +606,12 @@ class PosCreditUpdate(models.Model):
         return -balance + new_balance
 
     def update_balance(self, vals):
-        partner = vals.get('partner_id') and self.env['res.partner'].browse(vals.get('partner_id')) or self.partner_id
+        partner_id = vals.get('partner_id', self.partner_id.id)
         new_balance = vals.get('new_balance', self.new_balance)
         state = vals.get('state', self.state) or 'draft'
         update_type = vals.get('update_type', self.update_type)
         if (state == 'draft' and update_type == 'new_balance'):
-            data = partner._compute_partner_journal_debt(self.journal_id.id)
-            credit_balance = data[partner.id].get('balance', 0)
+            credit_balance = self.partner_id.browse(partner_id).credit_balance
             vals['balance'] = self.get_balance(credit_balance, new_balance)
 
     @api.model
@@ -657,9 +637,3 @@ class PosCreditUpdate(models.Model):
         active_ids = self._context.get('active_ids')
         for r in self.env['pos.credit.update'].browse(active_ids):
             r.switch_to_confirm()
-
-
-class AccountPayment(models.Model):
-    _inherit = 'account.payment'
-
-    has_invoices = fields.Boolean(store=True)
