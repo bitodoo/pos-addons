@@ -32,10 +32,4 @@
             </span>
         </t>
     </t>
-
-    <t t-extend="BillReceipt">
-        <t t-jquery="t[t-esc='receipt.cashier']" t-operation="replace">
-            <t t-esc='order.ms_info.created.user.name'/>
-        </t>
-    </t>
 </templates>
